@@ -8,7 +8,6 @@ For the last couple of weekends, I've been working on a major reorganization of 
 I thought I could knock this out in one simple script: one where I wrote a function to generate the desired data, then use find's -exec option to run the function on the subdirectories. But I found out something that I didn't know: find's -exec option [doesn't work with user-defined functions](https://unix.stackexchange.com/a/50695). I decided that instead of using xargs, that I'd split up the task into two different scripts `enumerator` and `census`.
 
 Here's `enumerator`. I decided to exclude .git directories from my depth calculations.
-
 ```bash
 #!/bin/bash
 
@@ -21,7 +20,7 @@ printf "%s\t%s\t%s\t%s\n"  "$count" "$size" "$depth" "$1"
 ```
 
 
-And here's `census`. It has pretty colors and optionally takes folders as arguments. I may build on these later, but it's nice to have the basic logic down.
+And here's `census`. It has pretty colors and optionally takes folders as arguments. Since since directories sometimes have spaces in their names, I opted for tab separation. This works nicely with awk (e.g. `census | head -1 | awk -F"\t" '{ print $4}'`).
 
 ```bash
 #!/bin/bash
