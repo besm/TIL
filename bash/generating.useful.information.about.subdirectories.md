@@ -1,5 +1,5 @@
-title: "Generating Useful Information about Subdirectories"
-date: "2021-05-03"
+# Generating Useful Information about Subdirectories
+## 2021-05-03
 
 For the last couple of weekends, I've been working on a major reorganization of my file system. Since I've been doing this in a piecemeal fashion and want to be able to budget my time, I thought it would to get a birds-eye view of the directory I'm migrating. Namely, I want to have recursive counts of the number of files in a folder's subdirectories, the size of those files, and how deeply nested the directory is. Moreover, I wanted the the output to be formatted in such a way that I could do useful things with it: navigate to the most populated folder, navigate to the smallest directory, or whatever.
 
