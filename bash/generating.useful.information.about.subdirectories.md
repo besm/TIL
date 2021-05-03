@@ -3,7 +3,7 @@ title: "Generating Useful Information about Subdirectories"
 date: "2021-05-03"
 ---
 
-For the last couple of weekends, I've been working on a major reorganization of my file system. Since I've been doing this in a piecemeal fashion and want to be able to budget my time, it is useful to be able to get a birds-eye view of the directory I'm working in. Namely, I want to have recursive counts of the number of files in a folder's subdirectories, the size of those files, and how deeply nested the directory is. Moreover, I wanted the the output to be formatted in such a way that I could do useful things with it: navigate to the most populated folder, navigate to the smallest directory, or whatever.
+For the last couple of weekends, I've been working on a major reorganization of my file system. Since I've been doing this in a piecemeal fashion and want to be able to budget my time, I thought it would to get a birds-eye view of the directory I'm migrating. Namely, I want to have recursive counts of the number of files in a folder's subdirectories, the size of those files, and how deeply nested the directory is. Moreover, I wanted the the output to be formatted in such a way that I could do useful things with it: navigate to the most populated folder, navigate to the smallest directory, or whatever.
 
 I thought I could knock this out in one simple script: one where I wrote a function to generate the desired data, then use find's -exec option to run the function on the subdirectories. But I found out something that I didn't know: find's -exec option [doesn't work with user-defined functions](https://unix.stackexchange.com/a/50695). I decided that instead of using xargs, that I'd split up the task into two different scripts `enumerator` and `census`.
 
@@ -14,7 +14,8 @@ Here's `enumerator`. I decided to exclude .git directories from my depth calcula
 
 count="$(find "$1" -type f | wc -l)"
 size="$(du -sh "$1" | awk '{ print $1 }')"
-depth="$(find "$1" -type d -not -path '*/\.git/*' | awk -F"/" 'NF > max {max = NF} END {print max - 1}')"
+depth="$(find "$1" -type d -not -path '*/\.git/*' |\
+     awk -F"/" 'NF > max {max = NF} END {print max - 1}')"
 
 printf "%s\t%s\t%s\t%s\n"  "$count" "$size" "$depth" "$1"
 ```
@@ -33,12 +34,14 @@ formatter () {
 
 
 if [ -z "$1" ]; then
-    find . -mindepth 1 -maxdepth 1 \( ! -regex '.*/\..*' \) -type d -not -path '*/\.git/*' -exec enumerator {} \; | formatter
+    find . -mindepth 1 -maxdepth 1 \( ! -regex '.*/\..*' \) -type d -not -path '*/\.git/*' \
+        -exec enumerator {} \; | formatter
 else
     target="$(realpath "$1")"
     [ ! -d "$target" ] && exit
-    find "$target" -mindepth 1 -maxdepth 1 \( ! -regex '.*/\..*' \) -type d -not -path '*/\.git/*' -exec enumerator {} \; |\
-    sed "s|$target\/||g" | formatter
+    find "$target" -mindepth 1 -maxdepth 1 \( ! -regex '.*/\..*' \) -type d -not -path '*/\.git/*' \
+        -exec enumerator {} \; |\
+        sed "s|$target\/||g" | formatter
 fi
 
 ```
